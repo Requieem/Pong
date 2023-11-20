@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -10,11 +11,15 @@ public class PaddleController : MonoBehaviour
     [SerializeField] private SharedFloat m_speed;
     [SerializeField] private SharedFloat m_ballOffset;
     [SerializeField][Range(1, 2)] private int m_playerNumber;
+    [SerializeField] private List<AudioClip> m_audioClips;
+    [SerializeField] private List<AudioClip> m_shootClips;
     [SerializeField] private bool m_invert = false;
 
     [Header("Initial State")]
     [SerializeField] private Ball m_ball;
 
+    [field: SerializeField] private bool LockUp { get; set; } = false;
+    [field: SerializeField] private bool LockDown { get; set; } = false;
     private bool HasBall => m_ball != null;
     private float BallOffset => !m_invert ? m_ballOffset.Value : -m_ballOffset.Value;
     private Vector3 BallDirection => !m_invert ? transform.right : -transform.right;
@@ -77,6 +82,7 @@ public class PaddleController : MonoBehaviour
 
         m_ball.OnMove(BallDirection);
         m_ball = null;
+        AudioPlayer.Instance.PlayRandomClip(m_shootClips);
     }
 
     private IEnumerator DoMove()
@@ -84,7 +90,14 @@ public class PaddleController : MonoBehaviour
         while(m_direction != Vector2.zero)
         {
             m_direction = MoveAction.ReadValue<Vector2>();
-            transform.Translate(m_direction * m_speed.Value * Time.deltaTime);
+            var _direction = m_direction;
+
+            if(LockUp && _direction.y > 0)
+                _direction.y = 0;
+            if(LockDown && _direction.y < 0)
+                _direction.y = 0;
+
+            transform.Translate(m_speed.Value * Time.deltaTime * _direction);
             if(HasBall)
                 m_ball.transform.position = transform.position + (transform.right * BallOffset);
             yield return null;
@@ -99,6 +112,16 @@ public class PaddleController : MonoBehaviour
         {
             var _ball = collision.gameObject.GetComponent<Ball>();
             _ball.OnMove((collision.transform.position - transform.position).normalized);
+            AudioPlayer.Instance.PlayRandomClip(m_audioClips);
         }
     }
+
+    public void ToggleLock(bool dir, bool value)
+    {
+        if(dir)
+            LockUp = value;
+        else
+            LockDown = value;
+    }
+
 }
