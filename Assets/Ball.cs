@@ -6,13 +6,30 @@ public class Ball : MonoBehaviour
     [Header("Configuration")]
 
     [SerializeField] private SharedFloat m_speed;
+    [SerializeField] private float m_speedMultiplier = 1.1f;
+
+    private float m_currentSpeed = 0f;
 
     private Vector2 m_direction = Vector2.zero;
     private Coroutine m_moving;
 
-    public void OnBounce()
+    public Vector2 Direction => m_direction;
+
+    private void OnEnable()
     {
-        m_direction = Vector2.Reflect(m_direction, Vector2.up);
+        m_currentSpeed = m_speed.Value;
+    }
+
+    public void OnBounce(Vector2 normal)
+    {
+        m_currentSpeed *= m_speedMultiplier;
+        OnMove(Vector2.Reflect(m_direction, normal));
+    }
+
+    public void OnPaddle(Vector2 direction)
+    {
+        m_currentSpeed *= m_speedMultiplier;
+        OnMove(direction);
     }
 
     public void OnMove(Vector2 direction)
@@ -39,7 +56,7 @@ public class Ball : MonoBehaviour
     {
         while(m_direction != Vector2.zero)
         {
-            transform.Translate(m_direction * m_speed.Value * Time.deltaTime);
+            transform.Translate(m_direction * m_currentSpeed * Time.deltaTime);
             yield return null;
         }
 
@@ -49,6 +66,8 @@ public class Ball : MonoBehaviour
     public void ResetState(PaddleController controller)
     {
         OnStop();
+        m_currentSpeed = m_speed.Value;
         controller.Ball = this;
+        controller.HasBall = true;
     }
 }
