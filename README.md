@@ -85,7 +85,7 @@
 
 [![Pong-Screenshot][product-screenshot]](https://upload.wikimedia.org/wikipedia/commons/f/f8/Pong.png)
 
-I obviously do not own the rights for the above image, but let's face the fact that it had to be thrown somewhere on here. This project is basically a clone of the original Pong with some. Its use is mainly focused on showcasing my (if any) abilities in Unity and Csharp Development.
+I obviously do not own the rights for the above image, but let's face the fact that it had to be thrown somewhere on here. This project is basically a clone of the original Pong. Its use is mainly focused on showcasing my (if any) abilities in Unity and Csharp Development.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
