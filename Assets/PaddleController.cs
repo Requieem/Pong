@@ -8,6 +8,7 @@ public class PaddleController : MonoBehaviour
 {
     [Header("Configuration")]
 
+    [SerializeField] private string m_playerName;
     [SerializeField] private InputActionAsset m_inputActionAsset;
     [SerializeField] private SharedFloat m_speed;
     [SerializeField] private SharedFloat m_ballOffset;
@@ -24,6 +25,8 @@ public class PaddleController : MonoBehaviour
     [field: SerializeField] private bool LockUp { get; set; } = false;
     [field: SerializeField] private bool LockDown { get; set; } = false;
     public bool HasBall { get => m_hasBall; set => m_hasBall = value; }
+    public bool IsAI { get => m_isAI; set => m_isAI = value; }
+    public string PlayerName => m_playerName;
     private bool CanStart => m_hasBall && m_ball != null;
     private float BallOffset => !m_invert ? m_ballOffset.Value : -m_ballOffset.Value;
     private Vector3 BallDirection => !m_invert ? transform.right : -transform.right;
@@ -46,8 +49,6 @@ public class PaddleController : MonoBehaviour
     private void OnEnable()
     {
         var _actionMap = m_inputActionAsset.FindActionMap("Player" + m_playerNumber.ToString());
-        Debug.Log("Player" + m_playerNumber.ToString());
-        _actionMap.Enable();
 
         MoveAction = _actionMap.FindAction("Move");
         StartAction = _actionMap.FindAction("Start");
