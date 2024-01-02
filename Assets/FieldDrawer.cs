@@ -31,46 +31,89 @@ public class FieldDrawer : MonoBehaviour
         }
     }
 
-    [SerializeField] private bool m_showDebug = false;
-    [SerializeField] private bool m_showComputeDebug = false;
-    [SerializeField] private bool m_showBackupDebug = false;
-    [SerializeField][Range(3, 10)] private int m_sides = 4;
-    [SerializeField] private float m_radius = 5f;
+    [SerializeField] private int m_maxSides = 10;
+    [SerializeField] private int m_minSides = 3;
     [SerializeField] private float m_smoothSpeed = 1f;
     [SerializeField] private float m_maxIterations = 200f;
-    [SerializeField] private UnityEvent<int> m_sidesSet;
-    [SerializeField] private HyperGoal[] m_goals = new HyperGoal[0];
-    [SerializeField] private Vector3[] m_compute = new Vector3[0];
-    [SerializeField] private Vector3[] m_backup = new Vector3[0];
-    [SerializeField] private Vector3[] m_show = new Vector3[0];
-    [SerializeField] private SideDefinition[] m_sidesDefinition = new SideDefinition[0];
+    [SerializeField] private bool m_showDebug = false;
     [SerializeField] private HyperGoal m_goalPrefab;
+    [SerializeField] private UnityEvent<int> m_sidesSet;
+    [SerializeField] private UnityEvent m_maxReached;
+    [SerializeField] private UnityEvent m_notMax;
+    [SerializeField] private UnityEvent m_minReached;
+    [SerializeField] private UnityEvent m_notMin;
 
-    private int m_lastDrawnSides = 0;
-    private float m_lastDrawnRadius = 0;
+    private int m_sides = 4;
+    private float m_radius = 5f;
 
     private bool m_isMoving = false;
-    private bool m_isRotating = false;
     private bool m_isScaling = false;
+    private bool m_isRotating = false;
     private bool m_isSmoothing = false;
+    private bool m_isMaxSides = false;
+    private bool m_isMinSides = false;
+
+    private Vector3[] m_show = new Vector3[0];
+    private Vector3[] m_backup = new Vector3[0];
+    private Vector3[] m_compute = new Vector3[0];
+    private HyperGoal[] m_goals = new HyperGoal[0];
+    private SideDefinition[] m_sidesDefinition = new SideDefinition[0];
 
     private void OnEnable()
     {
-        m_sidesDefinition = new SideDefinition[0];
-        m_goals = new HyperGoal[0];
+        CleanLists();
     }
 
     private void OnDisable()
     {
+        CleanLists();
+    }
+
+    private void CleanLists()
+    {
         m_sidesDefinition = new SideDefinition[0];
         m_goals = new HyperGoal[0];
     }
 
-    private void Update()
+    public void IncraseSides()
     {
-        if(m_lastDrawnSides != m_sides || m_lastDrawnRadius != m_radius)
+        if(m_sides >= m_maxSides)
+            return;
+
+        Draw(m_sides++);
+        Notify(m_sides);
+    }
+
+    public void DecreaseSides()
+    {
+        if(m_sides <= m_minSides)
+            return;
+
+        Draw(m_sides--);
+        Notify(m_sides);
+    }
+
+    private void Notify(int sides)
+    {
+        if(sides == m_maxSides && !m_isMaxSides)
         {
-            Draw();
+            m_isMaxSides = true;
+            m_maxReached.Invoke();
+        }
+        else if(sides != m_maxSides && m_isMaxSides)
+        {
+            m_isMaxSides = false;
+            m_notMax.Invoke();
+        }
+        else if(sides == m_minSides && !m_isMinSides)
+        {
+            m_isMinSides = true;
+            m_minReached.Invoke();
+        }
+        else if(sides != m_minSides && m_isMinSides)
+        {
+            m_isMinSides = false;
+            m_notMin.Invoke();
         }
     }
 
@@ -111,11 +154,17 @@ public class FieldDrawer : MonoBehaviour
         if(Application.isPlaying)
         {
             DespawnGoals();
+            var _oldGoals = m_goals;
             m_goals = SpawnGoals(m_sidesDefinition);
+
+            for(int _i = _oldGoals.Length - 1; _i >= m_goals.Length; _i--)
+            {
+                Destroy(_oldGoals[_i].gameObject);
+            }
         }
     }
 
-    private void Draw()
+    private void Draw(int oldSides)
     {
         int _length = m_compute.Length;
         Vector3[] _positions = new Vector3[_length];
@@ -137,8 +186,6 @@ public class FieldDrawer : MonoBehaviour
             Vector3 _pos = new Vector3(Mathf.Sin(_angle), Mathf.Cos(_angle), 0) * m_radius;
             m_compute[_i] = _pos;
             _angle += Mathf.PI * 2f / m_sides;
-            m_lastDrawnSides = m_sides;
-            m_lastDrawnRadius = m_radius;
         }
 
         if(m_backup.Length == 0)
@@ -147,14 +194,16 @@ public class FieldDrawer : MonoBehaviour
         }
 
         StopAllCoroutines();
-        StartCoroutine(SmoothDraw());
+        StartCoroutine(SmoothDraw(oldSides, m_sides));
     }
 
-    private IEnumerator SmoothDraw()
+    private IEnumerator SmoothDraw(int oldSides, int sides)
     {
         int _backupPositionCount = m_backup.Length;
         var _maxPositions = Mathf.Max(m_compute.Length, _backupPositionCount);
 
+        bool _decreasing = oldSides > sides;
+        bool _increasing = oldSides < sides;
 
         Vector3[] _positions = new Vector3[_maxPositions];
         m_show = m_show.ChangeLength(_maxPositions);
@@ -211,7 +260,7 @@ public class FieldDrawer : MonoBehaviour
                     m_sidesDefinition[_i] = new SideDefinition(_start, _end, transform);
                 }
 
-                if(Application.isPlaying && m_sidesDefinition.Length != m_goals.Length)
+                if(Application.isPlaying && m_sidesDefinition.Length > m_goals.Length)
                 {
                     m_goals = SpawnGoals(m_sidesDefinition);
                 }
@@ -219,9 +268,21 @@ public class FieldDrawer : MonoBehaviour
                 for(int _i = 0; _i < m_goals.Length; _i++)
                 {
                     if(_i >= m_sidesDefinition.Length)
-                        m_goals[_i].Setup(m_sidesDefinition[_i - 1]);
+                    {
+                        m_goals[_i].Setup(m_sidesDefinition[m_sidesDefinition.Length - 1]);
+                    }
                     else
                         m_goals[_i].Setup(m_sidesDefinition[_i]);
+
+                    if(_decreasing && _i >= sides)
+                    {
+                        m_goals[_i].RemovePaddle(true);
+                    }
+
+                    if(_increasing && _i < sides)
+                    {
+                        m_goals[_i].RestorePaddle();
+                    }
                 }
 
                 _toSmooth = _positions.Take(_maxPositions).Where((pos, i) => i < m_compute.Length ? pos != m_compute[i] : pos != m_compute[i - 1]).Any();
@@ -232,6 +293,7 @@ public class FieldDrawer : MonoBehaviour
         }
 
         m_show = m_show.ChangeLength(m_compute.Length);
+
         for(int _i = 0; _i < m_show.Length - 1; _i++)
         {
             m_show[_i] = m_compute[_i];
@@ -250,7 +312,13 @@ public class FieldDrawer : MonoBehaviour
         if(Application.isPlaying)
         {
             DespawnGoals();
+            var _oldGoals = m_goals;
             m_goals = SpawnGoals(m_sidesDefinition);
+
+            for(int _i = _oldGoals.Length - 1; _i >= m_goals.Length; _i--)
+            {
+                Destroy(_oldGoals[_i].gameObject);
+            }
         }
 
         for(int _i = 0; _i < m_goals.Length; _i++)
@@ -324,19 +392,9 @@ public class FieldDrawer : MonoBehaviour
         if(m_show == null || m_show.Length == 0)
             return;
 
-        if(m_showBackupDebug)
-        {
-            DebugPolygon(m_backup, Color.red);
-        }
-
         if(m_showDebug)
         {
             DebugPolygon(m_show, Color.yellow, true);
-        }
-
-        if(m_showComputeDebug)
-        {
-            DebugPolygon(m_compute, Color.green);
         }
     }
 }

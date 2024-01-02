@@ -8,8 +8,14 @@ public class HyperGoal : MonoBehaviour
     [SerializeField] private PaddleController m_paddle;
     [SerializeField] private List<AudioClip> m_audioClips;
     [SerializeField] private GameObject m_paddlePrefab;
-    [SerializeField] private BoxCollider2D m_collider;
-    [SerializeField] private LineRenderer m_lineRenderer;
+    [SerializeField] private Sprite m_poleSprite;
+
+    private BoxCollider2D m_collider;
+    private LineRenderer m_lineRenderer;
+    private SpriteRenderer m_startSprite;
+    private SpriteRenderer m_endSprite;
+
+    private bool m_lock = false;
 
     private void OnCollisionEnter2D(Collision2D other)
     {
@@ -47,6 +53,24 @@ public class HyperGoal : MonoBehaviour
             m_lineRenderer.endWidth = 0.1f;
         }
 
+        if(m_startSprite == null)
+        {
+            m_startSprite = new GameObject("StartSprite").AddComponent<SpriteRenderer>();
+            m_startSprite.sprite = m_poleSprite;
+            m_startSprite.transform.localScale = new Vector3(0.35f, 0.35f, 0.35f);
+        }
+
+        m_startSprite.transform.localPosition = sideDefinition.Start;
+
+        if(m_endSprite == null)
+        {
+            m_endSprite = new GameObject("EndSprite").AddComponent<SpriteRenderer>();
+            m_endSprite.sprite = m_poleSprite;
+            m_endSprite.transform.localScale = new Vector3(0.35f, 0.35f, 0.35f);
+        }
+
+        m_endSprite.transform.localPosition = sideDefinition.End;
+
         var _position = sideDefinition.Middle;
         transform.position = _position;
 
@@ -59,16 +83,33 @@ public class HyperGoal : MonoBehaviour
         m_collider.offset = new Vector2(-0.3f, 0);
         m_lineRenderer.SetPositions(new Vector3[] { new Vector3(-0.3f, -_distance / 2f, 0), new Vector3(-0.3f, _distance / 2f, 0) });
 
+        if(!m_lock)
+        {
+            RestorePaddle();
+        }
+    }
+
+    public void RemovePaddle(bool doLock = false)
+    {
+        if(m_paddle != null)
+            Destroy(m_paddle.gameObject);
+
+        m_lock = doLock;
+        m_paddle = null;
+    }
+
+    public void RestorePaddle()
+    {
         if(m_paddle == null)
         {
-            m_paddle = Instantiate(m_paddlePrefab, _position, _rotation).GetComponent<PaddleController>();
+            m_paddle = Instantiate(m_paddlePrefab, transform.position, transform.rotation).GetComponent<PaddleController>();
             m_paddle.transform.SetParent(transform);
+            m_lock = false;
         }
     }
 
     public void OnDestroy()
     {
-        if(m_paddle != null)
-            Destroy(m_paddle.gameObject);
+        RemovePaddle();
     }
 }

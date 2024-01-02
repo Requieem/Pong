@@ -49,4 +49,4 @@ MonoBehaviour:
   m_audioClips:
   - {fileID: 8300000, guid: bdf799b03c775f948b577b0259a11172, type: 3}
   m_paddlePrefab: {fileID: 2723855266010867511, guid: a57a6c33ab685c34ab02809a964c51f8, type: 3}
-  m_collider: {fileID: 0}
+  m_poleSprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
