@@ -3417,6 +3417,39 @@ Transform:
   m_Children: []
   m_Father: {fileID: 33253025}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1334328236
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1334328237}
+  m_Layer: 0
+  m_Name: '### HYPER'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1334328237
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1334328236}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1759974139}
+  - {fileID: 1691975439}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1343077652
 GameObject:
   m_ObjectHideFlags: 0
@@ -4514,7 +4547,7 @@ GameObject:
   - component: {fileID: 1691975438}
   - component: {fileID: 1691975440}
   m_Layer: 0
-  m_Name: '### HYPER'
+  m_Name: '### HYPERFIELD'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4535,7 +4568,7 @@ MonoBehaviour:
   m_maxSides: 10
   m_minSides: 3
   m_smoothSpeed: 7.5
-  m_maxIterations: 250
+  m_maxIterations: 300
   m_showDebug: 1
   m_goalPrefab: {fileID: 2274810219392322968, guid: 0ac841b4ea3ba3147bf10b14f9538990, type: 3}
   m_sidesSet:
@@ -4621,13 +4654,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1691975436}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.5}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1759974139}
-  m_Father: {fileID: 0}
+  m_Children: []
+  m_Father: {fileID: 1334328237}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1691975440
 MonoBehaviour:
@@ -4643,30 +4675,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_duration: 1
   m_tweenData:
-  - Position: {x: 0, y: -1, z: -1}
-    Rotation: {x: 0, y: 0, z: 0}
+  - Position: {x: 0, y: -1.25, z: -1}
+    Rotation: {x: 0, y: 0, z: -120}
     Scale: {x: 1.15, y: 1.15, z: 1.15}
   - Position: {x: 0, y: 0, z: -1}
-    Rotation: {x: 0, y: 0, z: 45}
+    Rotation: {x: 0, y: 0, z: -135}
+    Scale: {x: 1.2, y: 1.2, z: 1.2}
+  - Position: {x: 0, y: -0.325, z: -1}
+    Rotation: {x: 0, y: 0, z: -144.094}
     Scale: {x: 1, y: 1, z: 1}
-  - Position: {x: 0, y: -0.3, z: -1}
-    Rotation: {x: 0, y: 0, z: 0}
+  - Position: {x: 0, y: -0.05, z: -1}
+    Rotation: {x: 0, y: 0, z: -150}
     Scale: {x: 1, y: 1, z: 1}
+  - Position: {x: 0, y: -0.15, z: -1}
+    Rotation: {x: 0, y: 0, z: -154.371}
+    Scale: {x: 0.95, y: 0.95, z: 0.95}
+  - Position: {x: 0, y: -0.05, z: -1}
+    Rotation: {x: 0, y: 0, z: -157.453}
+    Scale: {x: 1, y: 1, z: 1}
+  - Position: {x: 0, y: -0.05, z: -1}
+    Rotation: {x: 0, y: 0, z: -160.078}
+    Scale: {x: 0.9, y: 0.9, z: 0.9}
   - Position: {x: 0, y: 0, z: -1}
-    Rotation: {x: 0, y: 0, z: 30}
-    Scale: {x: 1, y: 1, z: 1}
-  - Position: {x: 0, y: -0.3, z: -1}
-    Rotation: {x: 0, y: 0, z: 0}
-    Scale: {x: 1, y: 1, z: 1}
-  - Position: {x: 0, y: 0, z: -1}
-    Rotation: {x: 0, y: 0, z: 22.5}
-    Scale: {x: 1, y: 1, z: 1}
-  - Position: {x: 0, y: 0, z: -1}
-    Rotation: {x: 0, y: 0, z: 0}
-    Scale: {x: 1, y: 1, z: 1}
-  - Position: {x: 0, y: 0, z: -1}
-    Rotation: {x: 0, y: 0, z: 18}
-    Scale: {x: 1, y: 1, z: 1}
+    Rotation: {x: 0, y: 0, z: -162}
+    Scale: {x: 0.9, y: 0.9, z: 0.9}
   m_finishedMoving:
     m_PersistentCalls:
       m_Calls:
@@ -4810,7 +4842,7 @@ RectTransform:
   - {fileID: 458705452}
   - {fileID: 544202576}
   - {fileID: 139026518}
-  m_Father: {fileID: 1691975439}
+  m_Father: {fileID: 1334328237}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -5907,7 +5939,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1879910545}
-  - {fileID: 1691975439}
+  - {fileID: 1334328237}
   - {fileID: 852964054}
   - {fileID: 1945599936}
   - {fileID: 64801118}

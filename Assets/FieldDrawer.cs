@@ -14,6 +14,7 @@ public class FieldDrawer : MonoBehaviour
         [SerializeField] private Vector3 m_start;
         [SerializeField] private Vector3 m_end;
         [SerializeField] private Transform m_transform;
+        [SerializeField] private int m_index;
 
         public Vector3 Start => m_transform.TransformPoint(m_start);
         public Vector3 End => m_transform.TransformPoint(m_end);
@@ -21,13 +22,15 @@ public class FieldDrawer : MonoBehaviour
         public Vector3 Normal => Vector3.Cross(End - Start, Vector3.forward).normalized;
         public float Angle => Vector3.SignedAngle(Vector3.right, Normal, Vector3.forward);
         public Quaternion Rotation => Quaternion.AngleAxis(Angle, Vector3.forward);
-        public float Distance => Vector3.Distance(Start, End) * 0.95f;
+        public float Distance => Vector3.Distance(Start, End) * 0.9f;
+        public int Index => m_index;
 
-        public SideDefinition(Vector3 start, Vector3 end, Transform transform)
+        public SideDefinition(Vector3 start, Vector3 end, Transform transform, int index)
         {
             m_start = start;
             m_end = end;
             m_transform = transform;
+            m_index = index;
         }
     }
 
@@ -257,7 +260,7 @@ public class FieldDrawer : MonoBehaviour
                 {
                     var _start = m_show[_i];
                     var _end = m_show[_i + 1];
-                    m_sidesDefinition[_i] = new SideDefinition(_start, _end, transform);
+                    m_sidesDefinition[_i] = new SideDefinition(_start, _end, transform, _i);
                 }
 
                 if(Application.isPlaying && m_sidesDefinition.Length > m_goals.Length)
@@ -306,7 +309,7 @@ public class FieldDrawer : MonoBehaviour
         {
             var _start = m_show[_i];
             var _end = m_show[_i + 1];
-            m_sidesDefinition[_i] = new SideDefinition(_start, _end, transform);
+            m_sidesDefinition[_i] = new SideDefinition(_start, _end, transform, _i);
         }
 
         if(Application.isPlaying)

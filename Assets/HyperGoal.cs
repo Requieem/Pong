@@ -34,58 +34,87 @@ public class HyperGoal : MonoBehaviour
         if(m_collider == null)
             m_collider = gameObject.AddComponent<BoxCollider2D>();
 
-        if(m_lineRenderer == null)
+        var _startColor = sideDefinition.Index > 0 ? Random.ColorHSV(valueMin: 0.35f, saturationMin: 0.2f, saturationMax: 0.3f, valueMax: 0.75f, alphaMax: 1f, alphaMin: 1f, hueMin: 0f, hueMax: 1f) : Color.white;
+        var _distance = sideDefinition.Distance;
+        var _rotation = sideDefinition.Rotation;
+        var _zOffset = new Vector3(0f, 0f, sideDefinition.Index * 0.01f);
+        var _position = sideDefinition.Middle;
+
+        transform.SetPositionAndRotation(_position, _rotation);
+        CreateSprite(out m_startSprite, m_startSprite, sideDefinition.Start - (sideDefinition.Normal * 0.3f) + _zOffset, _startColor);
+        CreateSprite(out m_endSprite, m_endSprite, sideDefinition.End - (sideDefinition.Normal * 0.3f) + _zOffset, _startColor);
+        CreateCollider(out m_collider, m_collider, new Vector2(0.1f, _distance), new Vector2(-0.3f, 0));
+        CreateLineRenderer(out m_lineRenderer, m_lineRenderer, new Vector3(-0.3f, -_distance / 2f, 0), new Vector3(-0.3f, _distance / 2f, 0), _startColor);
+
+        if(m_lock)
+            return;
+
+        CreatePaddle(out m_paddle, m_paddle, _startColor);
+    }
+
+    private void CreateCollider(out BoxCollider2D assigned, BoxCollider2D original, Vector2 size, Vector2 offset)
+    {
+        assigned = original;
+
+        if(assigned == null)
         {
-            m_lineRenderer = gameObject.AddComponent<LineRenderer>();
-            m_lineRenderer.colorGradient = new Gradient()
+            assigned = gameObject.AddComponent<BoxCollider2D>();
+        }
+
+        assigned.size = size;
+        assigned.offset = offset;
+    }
+
+    private void CreateLineRenderer(out LineRenderer assigned, LineRenderer original, Vector3 start, Vector3 end, Color color)
+    {
+        assigned = original;
+
+        if(assigned == null)
+        {
+            assigned = gameObject.AddComponent<LineRenderer>();
+            assigned.material = new Material(Shader.Find("Sprites/Default"));
+            assigned.useWorldSpace = false;
+            assigned.positionCount = 2;
+            assigned.startWidth = 0.1f;
+            assigned.endWidth = 0.1f;
+            assigned.colorGradient = new Gradient()
             {
                 colorKeys = new GradientColorKey[]
                 {
-                    new GradientColorKey(Random.ColorHSV(), 0),
-                    new GradientColorKey(Random.ColorHSV(), 1)
+                    new GradientColorKey(color, 0),
+                    new GradientColorKey(color, 1)
                 }
             };
-
-            m_lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-            m_lineRenderer.useWorldSpace = false;
-            m_lineRenderer.positionCount = 2;
-            m_lineRenderer.startWidth = 0.1f;
-            m_lineRenderer.endWidth = 0.1f;
         }
 
-        if(m_startSprite == null)
+        assigned.SetPositions(new Vector3[] { start, end });
+    }
+
+    private void CreateSprite(out SpriteRenderer assigned, SpriteRenderer original, Vector3 position, Color color)
+    {
+        assigned = original;
+
+        if(assigned == null)
         {
-            m_startSprite = new GameObject("StartSprite").AddComponent<SpriteRenderer>();
-            m_startSprite.sprite = m_poleSprite;
-            m_startSprite.transform.localScale = new Vector3(0.35f, 0.35f, 0.35f);
+            assigned = new GameObject("Sprite").AddComponent<SpriteRenderer>();
+            assigned.sprite = m_poleSprite;
+            assigned.transform.localScale = new Vector3(0.55f, 0.55f, 0.55f);
+            assigned.gameObject.AddComponent<CircleCollider2D>();
+            assigned.color = color;
         }
 
-        m_startSprite.transform.localPosition = sideDefinition.Start;
+        assigned.transform.position = position;
+    }
 
-        if(m_endSprite == null)
+    private void CreatePaddle(out PaddleController assigned, PaddleController original, Color color)
+    {
+        assigned = original;
+
+        if(assigned == null)
         {
-            m_endSprite = new GameObject("EndSprite").AddComponent<SpriteRenderer>();
-            m_endSprite.sprite = m_poleSprite;
-            m_endSprite.transform.localScale = new Vector3(0.35f, 0.35f, 0.35f);
-        }
-
-        m_endSprite.transform.localPosition = sideDefinition.End;
-
-        var _position = sideDefinition.Middle;
-        transform.position = _position;
-
-        var _rotation = sideDefinition.Rotation;
-        transform.rotation = _rotation;
-
-        var _distance = sideDefinition.Distance;
-
-        m_collider.size = new Vector2(0.3f, _distance);
-        m_collider.offset = new Vector2(-0.3f, 0);
-        m_lineRenderer.SetPositions(new Vector3[] { new Vector3(-0.3f, -_distance / 2f, 0), new Vector3(-0.3f, _distance / 2f, 0) });
-
-        if(!m_lock)
-        {
-            RestorePaddle();
+            assigned = Instantiate(m_paddlePrefab, transform.position, transform.rotation).GetComponent<PaddleController>();
+            assigned.transform.SetParent(transform);
+            assigned.GetComponent<SpriteRenderer>().color = color;
         }
     }
 
@@ -98,12 +127,24 @@ public class HyperGoal : MonoBehaviour
         m_paddle = null;
     }
 
+    public void RemoveSprite()
+    {
+        if(m_startSprite != null)
+            Destroy(m_startSprite.gameObject);
+        m_startSprite = null;
+
+        if(m_endSprite != null)
+            Destroy(m_endSprite.gameObject);
+        m_endSprite = null;
+    }
+
     public void RestorePaddle()
     {
         if(m_paddle == null)
         {
             m_paddle = Instantiate(m_paddlePrefab, transform.position, transform.rotation).GetComponent<PaddleController>();
             m_paddle.transform.SetParent(transform);
+            m_paddle.GetComponent<SpriteRenderer>().color = m_startSprite.color;
             m_lock = false;
         }
     }
@@ -111,5 +152,6 @@ public class HyperGoal : MonoBehaviour
     public void OnDestroy()
     {
         RemovePaddle();
+        RemoveSprite();
     }
 }
